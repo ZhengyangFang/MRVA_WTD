@@ -125,8 +125,7 @@ pi75 = ds["uncertainty_radius_pi75"]
 
 ## Data and code availability
 
-The final NetCDF data product should be deposited in a DOI-issuing repository
-and linked here before publication. Upstream datasets remain governed by their
+Upstream datasets remain governed by their
 original providers and licences.
 
 A code licence, a data-product licence, author metadata, and `CITATION.cff`
