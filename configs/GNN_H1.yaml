@@ -1,0 +1,118 @@
+paths:
+  aem_profile_path: "data/1 resistivity/aem_log10res_1km_masked.tif"
+  aem_depth_path: "data/1 resistivity/aem_depth_levels_m.json"
+  active_grid_path: "data/2 well WTD/active_cell_lookup.csv"
+  topography_1km_path: "data/5 topography/topo_1km.csv"
+  swb_dir: "data/3 SWB net_infiltration"
+  aiwum_dir: "data/4 pumping out"
+  wtd_monthly_path: "data/2 well WTD/2011_2023/wtd_monthly.csv"
+  data_processed_dir: "data/train_val_test_inputs/GNN_spacetime/H1"
+  sample_table_path: "data/train_val_test_inputs/GNN_spacetime/H1/sample_table.csv"
+  output_dir: "outputs/GNN_H1"
+
+data:
+  start_date: "2011-01"
+  end_date: "2023-12"
+  grid_id_col: "grid_id"
+  x_col: "x"
+  y_col: "y"
+  wtd_col: "wtd_m_bls"
+  target_type: "delta_h"
+  lookback_months: 0
+  horizons: [1]
+  scenario_mode: true
+  split_by: "spatiotemporal_grid_time"
+  spatial_split_seed: 42
+  spatial_split_fractions:
+    train: 0.80
+    test: 0.20
+  train_end: "2019-12"
+  val_start: "2020-01"
+  val_end: "2021-12"
+  test_start: "2022-01"
+  test_end: "2023-12"
+  split_quality_filter:
+    enabled: true
+    min_observation_days: 10
+    apply_to_splits:
+      - validation
+      - test_temporal
+      - test_spatial
+
+features:
+  dynamic:
+    - monthly_sum_net_infiltration
+    - monthly_pumping
+  use_log1p_pumping: true
+  pumping_log_input: "depth_mm"
+  use_aem_profile: true
+  aem_num_layers: 30
+  aem_max_depth_m: 150.0
+  use_topography: true
+  topography_columns:
+    - mean_elevation_m
+    - mean_slope_deg
+  use_horizon_forcing_summary: true
+  use_horizon_forcing_sequence: false
+  use_month_sin_cos: true
+  swb_input_unit: "in"
+  swb_output_unit: "mm"
+  generate_monthly_mean_net_infiltration: true
+  generate_monthly_max_7day_net_infiltration: true
+  pumping_missing_as_zero: true
+
+graph:
+  graph_type: "aem"
+  distance_mode: "knn"
+  regular_connectivity: 8
+  k_neighbors: 6
+  graph_hops: 2
+  length_scale_m: 2500.0
+  rho_scale: 0.35
+  make_undirected: true
+
+model:
+  hidden_dim: 48
+  static_embed_dim: 32
+  topography_embed_dim: 8
+  topography_mode: "encoded"
+  horizon_embed_dim: 16
+  forcing_embed_dim: 16
+  forcing_sequence_d_model: 32
+  forcing_sequence_num_layers: 1
+  forcing_sequence_num_heads: 4
+  forcing_sequence_max_len: 64
+  gnn_layers: 1
+  use_gnn_residual: true
+  dropout: 0.15
+
+training:
+  loss: "huber"
+  target_scaling: "global"
+  aux_loss:
+    enabled: true
+    corr_weight: 0.05
+    std_weight: 0.05
+    eps: 1.0e-6
+  loss_weighting:
+    enabled: true
+    normalize: true
+    horizon_weights:
+      "1": 1.0
+    quality:
+      enabled: true
+      min_observation_day_thresholds: [5, 10, 20, 28]
+      min_observation_day_weights: [0.25, 0.45, 0.75, 1.0, 1.15]
+      min_unique_site_thresholds: [2]
+      min_unique_site_weights: [0.95, 1.0]
+  batch_size: 256
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  num_workers: 0
+  pin_memory: true
+  persistent_workers: false
+  prefetch_factor: 2
+  use_amp: true
+  max_epochs: 300
+  patience: 20
+  seed: 42

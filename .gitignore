@@ -1,0 +1,54 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+.ipynb_checkpoints/
+build/
+dist/
+wheels/
+*.egg-info/
+
+# Virtual environments and local tools
+.venv/
+.gmt_env/
+.python-version
+
+# Local data, model artifacts, and generated figures
+data/
+data_raw/
+outputs/
+release_data/*.nc
+*.log
+
+# Manuscript materials are maintained outside the public code release
+manuscript/
+paper figures/
+~$*
+
+# Only the public analysis notebooks are tracked
+notebooks/*
+!notebooks/0_GNN_H1.ipynb
+!notebooks/0_GNN_H3.ipynb
+!notebooks/0_GNN_H6.ipynb
+!notebooks/1_MAP_recon.ipynb
+!notebooks/2_drought_metrics.ipynb
+!notebooks/3_clustering_physics.ipynb
+!notebooks/4_regression.ipynb
+!notebooks/Fig2.ipynb
+!notebooks/Fig3.ipynb
+
+# Only tools required by the public workflow are tracked
+tools/*
+!tools/build_grace_mrva_2011_2023.py
+!tools/download_daymet_monthly_prcp_mrva.py
+!tools/export_release_product.py
+!tools/propagate_uncertainty.py
+!tools/recon_mass_correction.py
+!tools/run_recon.py
+
+# Superseded local entry points and dependency list
+main.py
+mainline_reconstruction.py
+requirements.txt
+
+# Source module not used by the released workflow
+src/calibration.py

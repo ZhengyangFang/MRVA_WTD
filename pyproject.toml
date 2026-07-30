@@ -1,0 +1,30 @@
+[project]
+name = "gnn-to-wtd"
+version = "0.1.0"
+description = "Geophysics-informed graph neural network reconstruction of monthly water-table depth across the MRVA"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "cartopy>=0.25.0",
+    "earthaccess",
+    "geopandas>=1.1.3",
+    "ipykernel",
+    "jupyterlab",
+    "matplotlib",
+    "netcdf4",
+    "numpy",
+    "pandas",
+    "pyarrow",
+    "pyproj>=3.7.2",
+    "pyyaml",
+    "rasterio",
+    "requests",
+    "scikit-learn",
+    "scipy",
+    "shapely",
+    "tabulate>=0.10.0",
+    "torch",
+    "torch-geometric",
+    "tqdm",
+    "xarray>=2026.4.0",
+]
