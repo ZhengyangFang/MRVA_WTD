@@ -127,6 +127,3 @@ pi75 = ds["uncertainty_radius_pi75"]
 
 Upstream datasets remain governed by their
 original providers and licences.
-
-A code licence, a data-product licence, author metadata, and `CITATION.cff`
-must be added before the public release is finalized.
