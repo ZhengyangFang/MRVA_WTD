@@ -11,7 +11,7 @@ The public workflow covers:
 3. drought-response metric calculation;
 4. physics-guided assignment of three response classes;
 5. ExtraTrees prediction of Slow-recovery probability; and
-6. generation of the main Figure 2 and Figure 3 analyses.
+6. generation of the merged main Figure 2 and supplementary Figure S2 analyses.
 
 The manuscript, private working files, intermediate model caches, and
 unselected figure notebooks are not part of this code release.
@@ -64,7 +64,7 @@ Run the notebooks in this order:
 3_clustering_physics.ipynb
 4_regression.ipynb
 Fig2.ipynb
-Fig3.ipynb
+FigS2.ipynb
 ```
 
 The three training notebooks may be run independently. All three ensembles
