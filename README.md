@@ -9,9 +9,12 @@ The public workflow covers:
 1. horizon-specific GNN training for 1-, 3-, and 6-month WTD changes;
 2. monthly WTD reconstruction from January 2011 through December 2023;
 3. drought-response metric calculation;
-4. physics-guided assignment of three response classes;
-5. ExtraTrees prediction of Slow-recovery probability; and
-6. generation of the merged main Figure 2 and supplementary Figure S2 analyses.
+4. assignment of the three groundwater-recovery zones;
+5. ExtraTrees prediction of Slow-recovery probability;
+6. calculation of local recovery, persistence and management leverage;
+7. equal-volume pumping-reduction experiments and spatial-allocation comparisons;
+8. analysis of recovery benefits in initially unrecovered locations; and
+9. generation of selected main and supplementary figures.
 
 The manuscript, private working files, intermediate model caches, and
 unselected figure notebooks are not part of this code release.
@@ -22,7 +25,7 @@ unselected figure notebooks are not part of this code release.
 assets/spatial/       Small spatial overlays used by the public figures
 configs/              H1, H3, and H6 model configurations
 notebooks/            Public training, reconstruction, analysis, and figure notebooks
-src/                  GNN preprocessing, graph, model, training, and reconstruction code
+src/                  GNN, reconstruction, and management-experiment code
 tools/                Command-line tools required by the public workflow
 release_data/         Metadata and checksums for the separately archived WTD product
 data_manifest.csv     Source and local-path inventory for required input datasets
@@ -63,7 +66,11 @@ Run the notebooks in this order:
 2_drought_metrics.ipynb
 3_clustering_physics.ipynb
 4_regression.ipynb
+5_local_response_leverage.ipynb
+6_equal_volume_management.ipynb
+7_recovery_benefit_distribution.ipynb
 Fig2.ipynb
+Fig4.ipynb
 FigS2.ipynb
 ```
 
@@ -118,8 +125,9 @@ pi75 = ds["uncertainty_radius_pi75"]
 - The active MRVA grid contains 87,871 cells at 1-km spacing in EPSG:5070.
 - The reconstruction contains 156 monthly fields from 2011-01 to 2023-12.
 - Random seeds are fixed at 11, 22, 33, 44, and 55 for each prediction interval.
-- GRACE/GRACE-FO values are not used to train the GNN or define response
-  classes. They provide an independent regional-scale comparison.
+- GRACE/GRACE-FO values are not used to train the GNN or define
+  groundwater-recovery zones. They provide an independent regional-scale
+  comparison.
 - Notebook execution outputs are intentionally cleared from the public
   versions to remove local paths and machine-specific metadata.
 
