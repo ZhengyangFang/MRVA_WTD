@@ -1,9 +1,4 @@
-"""Build a standalone Nature Portfolio project from the reviewed TeX conversion.
-
-The generated project deliberately keeps each submitted manuscript as a single
-TeX file, following the official Springer Nature template's submission note.
-The class file ``sn-jnl.cls`` is vendored unchanged alongside the output.
-"""
+"""Build a Nature Portfolio project from the LaTeX conversion."""
 
 from __future__ import annotations
 
@@ -77,9 +72,7 @@ AUTHORS_AND_AFFILIATIONS = r"""\title[Geophysics-informed groundwater reconstruc
 
 def body_text(filename: str) -> str:
     text = (SOURCE / "content" / filename).read_text(encoding="utf-8").strip()
-    # Word conversion preserved explicit inch dimensions for every image.  The
-    # official class has a narrower text block, so retain each intended size
-    # but scale down only figures that exceed the available line width.
+    # Scale figures to the available line width.
     figure_pattern = re.compile(r"\\includegraphics(?:\[[^\]]*\])?\{[^}]+\}")
     return figure_pattern.sub(lambda match: r"\pandocbounded{" + match.group(0) + "}", text)
 

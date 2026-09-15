@@ -1408,7 +1408,7 @@ def build_figs28(force: bool = False, output_path: Path | None = None) -> dict:
         panel.set_xticks([1, 2, 3, 4, 5])
         panel.set_ylim(0.05, 0.40)
         panel.set_yticks([0.1, 0.2, 0.3, 0.4])
-    axes[0].set_ylabel("Storage efficiency")
+    axes[0].set_ylabel("Storage benefit per unit\npumping reduction")
     axes[1].set_ylabel("")
     axes[0].legend(
         loc="lower center",

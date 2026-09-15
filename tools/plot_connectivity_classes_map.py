@@ -197,7 +197,7 @@ def make_connectivity_figure(
         src_nodata = ds.nodata
         active_mask = _build_active_cell_mask(ds, active_cell_csv)
 
-    # Keep only MRVA active cells.
+    # Select active MRVA cells.
     src_arr = np.where(active_mask, src_arr, np.nan).astype(np.float32, copy=False)
 
     class_idx_src = _build_class_index(src_arr, src_nodata)
@@ -229,14 +229,14 @@ def make_connectivity_figure(
         zorder=2,
     )
 
-    # Light outer boundary line.
+    # Draw the outer boundary.
     if boundary_prj.exists():
         boundary_crs = CRS.from_wkt(boundary_prj.read_text(encoding="utf-8"))
     else:
         boundary_crs = src_crs
     _plot_boundary(ax, boundary_shp, boundary_crs, line_color="#d0d0d0", line_width=0.9)
 
-    # Dark outline around classified mask.
+    # Outline the classified area.
     valid = np.isfinite(class_idx_wgs84)
     if np.any(valid):
         left, right, bottom, top = native_extent
@@ -248,7 +248,7 @@ def make_connectivity_figure(
         )
         ax.contour(x, y, valid.astype(np.float32), levels=[0.5], colors="black", linewidths=0.8, zorder=5)
 
-    # Ticks/labels styled to match target map.
+    # Style map ticks and labels.
     x_ticks = [-92.5, -90.0]
     y_ticks = [32.5, 35.0, 37.0]
     ax.set_xticks(x_ticks)

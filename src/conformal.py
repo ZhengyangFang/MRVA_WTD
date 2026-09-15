@@ -100,7 +100,7 @@ def summarize_prediction_intervals(
                 "level": float(level),
                 "nominal_coverage": float(level),
                 "empirical_coverage": float(np.mean(covered)),
-                # Kept for backward compatibility with older notebooks/CSVs.
+                # Store the legacy interval name.
                 "qhat_m": float(radius.iloc[0]),
                 "radius_reference_m": float(radius.iloc[0]),
                 "mean_radius_m": float(radius.mean()),

@@ -16,10 +16,10 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RECON_ROOT = MAINLINE_RECON_ROOT
 DEFAULT_GRACE_PATH = ROOT / "data" / "7 GRACE" / "grace_mrva_2011_2023_timeseries_full156.csv"
 
-# Ma et al. (2026) supplementary S1.3
+# Storage-layer settings.
 DEFAULT_LAYER_THICKNESS_M = [200.0, 100.0, 50.0, 25.0, 10.0, 5.0, 1.0, 0.6, 0.3, 0.1]
 DEFAULT_TSD_M = float(sum(DEFAULT_LAYER_THICKNESS_M))  # 392.0
-DEFAULT_POROSITY = 0.16  # fallback when spatial 10-layer porosity is unavailable
+DEFAULT_POROSITY = 0.16  # Default porosity.
 
 
 def _parse_layers(text: str | None) -> list[float]:
@@ -46,15 +46,7 @@ def _load_porosity_layers(
     porosity_path: Path | None,
     fallback_porosity: float,
 ) -> tuple[np.ndarray, dict[str, object]]:
-    """
-    Return porosity array shaped (n_layers, n_grid).
-    Supported formats:
-      - .npy
-          shape (n_layers, n_grid), (n_grid, n_layers), (n_grid,), (n_layers,)
-      - .csv
-          columns: grid_id + porosity_l1..porosity_l10  (or any n_layers)
-          or: grid_id + porosity
-    """
+    """Load porosity values as a layer-by-grid array."""
     if porosity_path is None:
         arr = np.full((n_layers, n_grid), float(fallback_porosity), dtype=np.float32)
         meta = {
@@ -108,7 +100,7 @@ def _load_porosity_layers(
             frame2 = frame.set_index("grid_id")[cols_use].sort_index()
             if len(frame2) < n_grid:
                 raise ValueError(f"Porosity CSV has {len(frame2)} rows, expected at least n_grid={n_grid}.")
-            # grid_id in this project is 0..n_grid-1
+            # Align porosity by grid identifier.
             frame2 = frame2.reindex(np.arange(n_grid))
             if frame2.isna().any().any():
                 raise ValueError("Porosity CSV has missing grid_id rows or missing porosity values.")
@@ -152,12 +144,7 @@ def _compute_storage_equiv_depth_matrix(
     layer_thickness_m: list[float],
     tsd_m: float,
 ) -> np.ndarray:
-    """
-    Return matrix (n_month, n_grid): equivalent saturated depth [m]
-    under paper-like layering equation:
-      sum_l h_l * phi_l
-    where h_l from partial/full saturation by TSD - WTD.
-    """
+    """Compute equivalent saturated depth for each month and grid cell."""
     n_month, n_grid = wtd_matrix_m_bls.shape
     n_layers = len(layer_thickness_m)
     if porosity_layers.shape != (n_layers, n_grid):
@@ -267,7 +254,7 @@ def main() -> None:
     if unc_path.exists():
         unc = np.asarray(np.load(unc_path, mmap_mode="r"), dtype=np.float32)
         if unc.shape == wtd.shape:
-            # Approximate storage uncertainty envelope by propagating WTD +/- radius.
+            # Propagate WTD uncertainty to storage.
             wtd_shallow = np.maximum(wtd - unc, 0.0)  # shallower water table -> larger storage
             wtd_deeper = wtd + unc                    # deeper water table -> smaller storage
             eq_hi = _compute_storage_equiv_depth_matrix(
@@ -295,7 +282,7 @@ def main() -> None:
     out_csv = out_dir / "paper_storage_monthly.csv"
     out.to_csv(out_csv, index=False)
 
-    # Regional comparison figure
+    # Draw the regional comparison.
     fig, axes = plt.subplots(2, 1, figsize=(13.5, 8.5), sharex=False)
 
     ax = axes[0]

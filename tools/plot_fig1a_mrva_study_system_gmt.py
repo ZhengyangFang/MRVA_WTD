@@ -543,8 +543,7 @@ def _aem_crs_from_dataset(ds) -> CRS:
                 except Exception:
                     pass
 
-    # USGS MAP AEM grid uses a WGS84 Albers projection. This is effectively
-    # co-registered with the project EPSG:5070 products at this map scale.
+    # Define the AEM grid projection.
     return CRS.from_proj4(
         "+proj=aea +lat_1=29.5 +lat_2=45.5 +lat_0=23 "
         "+lon_0=-96 +x_0=0 +y_0=0 +ellps=GRS80 +units=m +no_defs"
@@ -640,8 +639,7 @@ def write_map_layers(root: Path, work: Path) -> dict[str, Path]:
     write_gmt_lines(paths["mississippi"], mississippi)
     print(f"Mississippi River highlight segments in map extent: {len(mississippi):,}")
 
-    # Use the full map extent for the Fig. 1a hydrography context. We only keep
-    # the two largest HydroRIVERS classes so the regional drainage is legible.
+    # Load major rivers across the map extent.
     hydrorivers = hydrorivers_order_segments(ensure_hydrorivers(root, work), REGION, keep_near=None, orders=(1, 2))
     for order, segs in hydrorivers.items():
         write_gmt_lines(paths[f"river_order{order}"], segs)
@@ -896,9 +894,7 @@ def main() -> None:
     outputs = make_figure(Path(args.output_prefix), dpi=int(args.dpi))
     for key, path in outputs.items():
         print(f"{key}: {path}")
-    # Some local environments auto-load PyGMT, whose atexit hook can complain
-    # after we use GMT only through subprocess classic mode. The figure exports
-    # are already complete, so remove that unrelated hook if it is present.
+    # Remove the unused PyGMT exit hook.
     try:
         import atexit
         import sys

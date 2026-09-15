@@ -176,8 +176,7 @@ def _assign_spatiotemporal_split(
     if grid_split == "test_grid" and time_split == "train_years":
         return "test_spatial", grid_split, time_split, "spatial_generalization"
 
-    # Deliberately leave test grids in validation/test years out of the main split.
-    # This keeps the requested total test set as test_temporal + test_spatial.
+    # Assign temporal and spatial test samples.
     return None, grid_split, time_split, "held_out_unused"
 
 

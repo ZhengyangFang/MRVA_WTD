@@ -5,8 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 
-# Canonical reconstruction used for downstream drought metrics, clustering,
-# resistivity interpretation, and manuscript figures.
+# Runs the canonical groundwater reconstruction.
 MAINLINE_RECON_NAME = "RECON_MAIN_2011_2023"
 MAINLINE_RECON_ROOT = ROOT / "outputs" / MAINLINE_RECON_NAME
 

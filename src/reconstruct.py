@@ -463,10 +463,7 @@ class SpecialistPredictor:
         scalers = checkpoint["scalers"]
         state_dict = checkpoint["model_state_dict"]
 
-        # Reconstruction must reproduce the exact architecture stored in the
-        # checkpoint. Some trained horizons used residual GCN projection and/or
-        # raw topography concatenation; infer those modes from the weight keys
-        # instead of changing the saved checkpoint or training notebooks.
+        # Restore architecture options from the checkpoint.
         model_cfg = config.setdefault("model", {})
         features_cfg = config.setdefault("features", {})
         if any(key.startswith("gnn.residual_proj.") for key in state_dict):
@@ -715,22 +712,7 @@ def add_harmonic_pseudoobs(
     decay_scale_months: float = 6.0,
     min_pseudo_quality: float = 0.05,
 ) -> dict[str, Any]:
-    """Enrich the observation matrices with harmonic-model pseudo-observations.
-
-    For each grid with >= min_real_obs real observation months, fit an annual +
-    semi-annual harmonic plus linear trend to the observed WTD time series, then
-    fill unobserved months with model predictions (quality << real observations).
-
-    This provides the Laplacian background-field interpolation with local
-    seasonal estimates at sparsely observed months (e.g. drought trough months
-    where only 3-6 % of nodes have real measurements), preventing the background
-    field from being pulled toward shallower neighbouring values.
-
-    Real observations are never modified.  Pseudo-obs quality is kept well below
-    the >=1.0 floor of real observations, so assimilation always prefers real data.
-    The per-grid observation count (grid_observation_counts) is intentionally NOT
-    updated, so pseudo-obs never trigger the 'exact' assimilation branch.
-    """
+    """Add harmonic-model pseudo-observations to missing months."""
     from scipy.optimize import curve_fit  # lazy import
 
     obs_values  = np.array(observed["values"],  dtype=np.float32)
@@ -769,7 +751,7 @@ def add_harmonic_pseudoobs(
             continue
 
         pseudo_vals = _harmonic(unobs_t.astype(np.float64), *popt).astype(np.float32)
-        # Quality decays with distance to nearest real observation
+        # Scale quality by distance to the nearest observation.
         nearest_dist = np.array([
             float(np.min(np.abs(real_t - mt))) for mt in unobs_t
         ], dtype=np.float64)
@@ -790,8 +772,7 @@ def add_harmonic_pseudoobs(
     new_obs["quality"] = obs_quality
     new_obs["mask"]    = obs_mask
     new_obs["monthly_observation_counts"] = obs_mask.sum(axis=1).astype(np.int64)
-    # grid_observation_counts intentionally kept from original (real obs only),
-    # so pseudo-obs never trigger the exact-assimilation branch.
+    # Count only real observations by grid cell.
     if "grid_observation_counts" not in new_obs:
         real_mask = np.array(observed["mask"], dtype=bool)
         new_obs["grid_observation_counts"] = real_mask.sum(axis=0).astype(np.int64)

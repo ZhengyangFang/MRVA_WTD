@@ -1,9 +1,4 @@
-"""Build a review-ready, Nature-structured LaTeX package from the Word sources.
-
-This is deliberately a transparent conversion step: the Word documents remain
-the scientific-content source, while the generated project is the source for
-PDF review and for the eventual Nature production package.
-"""
+"""Build a Nature-style LaTeX package from the Word manuscripts."""
 
 from __future__ import annotations
 
@@ -104,8 +99,7 @@ def clean_tex(text: str) -> str:
         return r"\url{" + url + "}" + trailing
 
     text = re.sub(r"(?<![\\{])https?://[^\s}]+", wrap_bare_url, text)
-    # Pandoc represents Word cross-reference fields as hyperlinks to internal
-    # Word bookmarks. Nature needs the visible numerical citation only.
+    # Keep visible citation numbers.
     text = re.sub(
         r"\\hyperref\[_Ref[^\]]+\]\{(\\textsuperscript\{[^{}]*\})\}",
         r"\1",

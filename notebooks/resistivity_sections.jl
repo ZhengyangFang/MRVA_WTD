@@ -87,7 +87,7 @@ end
 function usage()
     return """
     Usage:
-      julia --project=. Fig4_resistivity_sections.jl [--output DIR] [--half-window-km N]
+      julia --project=. resistivity_sections.jl [--output DIR] [--half-window-km N]
                                                    [--view-azimuth-pi A]
                                                    [--view-elevation-pi E]
                                                    [--targets-csv PATH] [--target-set ID]

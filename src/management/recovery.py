@@ -1,4 +1,4 @@
-"""Recovery-definition checks and spatial benefit decomposition for FigS36–37."""
+"""Evaluate recovery timing and spatial benefit distribution."""
 
 from __future__ import annotations
 
@@ -56,7 +56,7 @@ def recovery_comparison(base_first, managed_first, cohort, start, endpoint):
     base = np.asarray(base_first)[cohort]
     managed = np.asarray(managed_first)[cohort]
     b_hit, m_hit = base <= endpoint, managed <= endpoint
-    # A new observed event with a still-censored baseline is a valid improvement.
+    # Count newly confirmed recovery events.
     earlier = m_hit & (managed < base)
     delayed = b_hit & (base < managed)
     b_wait = np.clip(np.minimum(base, endpoint + 1) - start, 0, None)
@@ -223,7 +223,7 @@ def analyze():
                                                         "consecutive_months": duration, "endpoint": endpoint,
                                                         "cohort": cohort_name, "response_class": label,
                                                         **recovery_comparison(base, treated, selected, initial+1, end)})
-                # Reproduce the old first-hit statistic separately, retaining its original missing-event rule.
+                # Calculate the legacy first-hit statistic.
                 old = ctx.recovery_summary(ctx.recovery_arrays(response[:12].astype(np.float32), WINDOW_2013), response[:12])
                 reference = legacy[(legacy.budget_nominal == budget) & (legacy.strategy == strategy) & (legacy.seed == seed)]
                 for row in old:

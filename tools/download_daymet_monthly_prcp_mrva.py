@@ -17,12 +17,12 @@ RAW_NC_DIR = OUT_DIR / "_raw_nc_tmp"
 
 YEARS = list(range(2011, 2024))  # 2011-2023 inclusive
 
-# Daymet V4R1 monthly dataset in Earthdata CMR
+# Daymet V4R1 dataset identifier.
 SHORT_NAME = "Daymet_Monthly_V4R1_2131"
 VERSION = "4.1"
 TARGET_FILE_TEMPLATE = "daymet_v4_prcp_monttl_na_{year}.nc"
 
-# Daymet Lambert Conformal Conic projection from official user guide.
+# Daymet map projection.
 DAYMET_LCC = CRS.from_proj4(
     "+proj=lcc +lat_1=25 +lat_2=60 +lat_0=42.5 +lon_0=-100 "
     "+x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs"
@@ -46,7 +46,7 @@ def _build_index_map(daymet_x: np.ndarray, daymet_y: np.ndarray, cells: pd.DataF
     )
 
     ix = _nearest_index_ascending(daymet_x, x_daymet)
-    # y axis in Daymet files is descending (north to south), so reverse for search.
+    # Reverse the descending Daymet y axis.
     y_rev = daymet_y[::-1]
     iy_rev = _nearest_index_ascending(y_rev, y_daymet)
     iy = (len(daymet_y) - 1) - iy_rev
@@ -118,7 +118,7 @@ def main() -> None:
             all_month_labels.extend(month_labels)
             all_blocks.append(point_prcp)
 
-        # keep disk usage small: remove annual CONUS file after extracting MRVA points.
+        # Remove the annual file after extraction.
         nc_path.unlink(missing_ok=True)
         print(f"Extracted and removed raw file for {year}.")
 

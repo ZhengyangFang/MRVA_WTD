@@ -12,7 +12,7 @@ from rasterio.warp import Resampling, reproject
 
 try:
     from scipy.ndimage import gaussian_filter
-except Exception:  # pragma: no cover - fallback for lean environments
+except Exception:  # pragma: no cover
     gaussian_filter = None
 
 
@@ -213,7 +213,7 @@ def main() -> None:
             }
         )
 
-    # AIWUM2-style non-growing monthly climatology, scaled by each target year's corrected growing total.
+    # Build the monthly climatology from corrected annual totals.
     nongrow_templates: dict[int, np.ndarray] = {}
     nongrow_ratio_to_growing: dict[int, float] = {}
     aiwum2_growing_total_all = 0.0

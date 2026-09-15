@@ -119,9 +119,7 @@ SKIP_KEYWORDS = (
     "pdf",
 )
 
-# Broad fallback boxes are only used when a source exposes no downloadable
-# footprint and no machine-readable metadata bounding box. They keep the global
-# context map complete while the status table records their lower precision.
+# Approximate survey bounds.
 APPROX_BBOX = {
     "AEM03": (-125.0, 32.0, -114.0, 42.5),
     "AEM04": (-122.4, 39.3, -121.3, 40.2),
@@ -171,9 +169,7 @@ APPROX_BBOX = {
     "AEM70": (108.5, -2.3, 114.8, 1.7),
 }
 
-# Source pages sometimes expose useful files under generic names that do not
-# contain "flightline" or "footprint". These are still lightweight outline or
-# survey-plan products and are safer than catalogue rectangles.
+# Survey files with generic download names.
 MANUAL_DOWNLOADS = {
     "AEM36": [
         "https://open.yukon.ca/information/6c4f1356-6c72-42c4-9d9f-145b6d9458d4/resource/ee69c298-93e3-44fa-bb10-fd840c8553be/download/kluane-lake-west-electromagnetic-survey-parts-of-nts-115g-5-6-11-and-12-rxd271cc.zip",
@@ -236,8 +232,7 @@ REMOTE_ZIP_MEMBER_DOWNLOADS = {
             ],
         },
     ],
-    # The complete GA package is ~739 MB, but the survey-line shapefile members
-    # are small and can be extracted reproducibly with HTTP range requests.
+    # Extract the survey-line members from the archive.
     "AEM51": [
         {
             "url": "https://d28rz98at9flks.cloudfront.net/130349/130349_data.zip",
@@ -264,9 +259,7 @@ EXTRA_SCIENCEBASE_IDS = {
 }
 
 CSV_DEFAULT_CRS = {
-    # ScienceBase measured/processed CSVs use projected coordinates but do not
-    # carry an EPSG column. These CRS values are stated by the coordinate labels
-    # or match the survey locations.
+    # Coordinate systems for projected survey tables.
     "AEM17": 32615,  # Cedar Rapids, Iowa, UTM zone 15N
     "AEM18": 32612,  # Yellowstone processed files, E_UTM12N / N_UTM12N
     "AEM20": 32612,  # Upper San Pedro Basin, Arizona, UTM zone 12N
@@ -553,7 +546,7 @@ def bbox_feature(rec: dict, bbox: tuple[float, float, float, float], source: str
 
 
 def sciencebase_file_url(file_rec: dict) -> str | None:
-    # Cloud shapefile facets may expose a JS-only manager URL and a public S3 URL.
+    # Select the downloadable file URL.
     return file_rec.get("publishedS3Uri") or file_rec.get("downloadUri") or file_rec.get("url")
 
 
@@ -631,11 +624,7 @@ def process_sciencebase(s: requests.Session, rec: dict, item_id: str, downloads:
 
 
 def sciencebase_child_ids(s: requests.Session, rec: dict, item_id: str, downloads: list[dict]) -> list[str]:
-    """Return one level of ScienceBase child item ids.
-
-    Some USGS pages expose the useful footprint shapefiles only on child items,
-    while the parent item contains only a catalogue bbox.
-    """
+    """Return ScienceBase child item identifiers."""
     folder = DOWNLOAD_DIR / rec["source_id"] / f"sciencebase_{item_id}"
     folder.mkdir(parents=True, exist_ok=True)
     url = f"https://www.sciencebase.gov/catalog/items?parentId={item_id}&format=json&max=1000"
@@ -1162,7 +1151,7 @@ def footprint_from_raster(path: Path):
             mask = np.any(arr != ds.nodata, axis=0)
         elif ds.count >= 3 and np.issubdtype(arr.dtype, np.integer):
             rgb = np.moveaxis(arr[:3], 0, -1)
-            # Registered map images commonly use white outside the survey swath.
+            # Mask the white area outside the survey.
             mask = ~np.all(rgb >= 245, axis=-1)
         else:
             mask = np.isfinite(arr[0])
@@ -1422,7 +1411,7 @@ def main() -> None:
 
     for rec in records:
         if rec["source_id"] in APPROX_BBOX:
-            # Add only if exact metadata has not already supplied this source.
+            # Add missing approximate bounds.
             if not any(f["properties"]["source_id"] == rec["source_id"] for f in bbox_features):
                 bbox_features.append(bbox_feature(rec, APPROX_BBOX[rec["source_id"]], "approx_from_description"))
 
@@ -1440,9 +1429,7 @@ def main() -> None:
     csv_features, csv_rows = footprint_from_csvs()
     write_csv(DATA_DIR / "csv_flightline_read_status.csv", csv_rows)
 
-    # Prefer true vectors, then grid-derived valid-data masks, then metadata or
-    # hand-entered approximate extents. This avoids drawing broad catalogue
-    # rectangles where a footprint or surface resistivity mask is available.
+    # Select the most detailed footprint for each survey.
     exact_features = vector_features + csv_features
     have_exact = {f["properties"]["source_id"] for f in exact_features}
     have_grid = {f["properties"]["source_id"] for f in grid_features}
