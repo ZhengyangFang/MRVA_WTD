@@ -26,7 +26,7 @@ assets/spatial/       Small spatial overlays used by the public figures
 configs/              H1, H3, and H6 model configurations
 notebooks/            Public training, reconstruction, analysis, and figure notebooks
 src/                  GNN, reconstruction, and management-experiment code
-tools/                Command-line tools required by the public workflow
+tools/                Workflow, data-preparation, figure, and quality-control tools
 release_data/         Metadata and checksums for the separately archived WTD product
 data_manifest.csv     Source and local-path inventory for required input datasets
 ```
@@ -42,6 +42,26 @@ uv run jupyter lab
 ```
 
 The exact dependency resolution is recorded in `uv.lock`.
+
+The two GMT-based Fig. 1a notebooks also require GMT 6 to be available on
+the system path. Their Python shapefile dependency is included in the project
+environment.
+
+## Command-line tools
+
+The reconstruction notebook calls these workflow tools directly:
+
+```text
+tools/run_recon.py
+tools/recon_mass_correction.py
+tools/propagate_uncertainty.py
+```
+
+`tools/export_release_product.py` packages the final monthly reconstruction
+for data release. The remaining tools prepare documented source datasets,
+generate the retained Fig. 1a and Fig. S1 products, or perform optional
+coordinate and performance checks. Manuscript-conversion utilities and
+superseded figure prototypes are not included in the public release.
 
 ## Required input data
 
